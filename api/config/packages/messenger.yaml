@@ -1,0 +1,9 @@
+framework:
+    messenger:
+        transports:
+#             amqp: '%env(MESSENGER_TRANSPORT_DSN)%'
+             amqp: 'enqueue://default'
+
+        routing:
+            # Route your messages to the transports
+             'App\Message\CreatePdf': amqp

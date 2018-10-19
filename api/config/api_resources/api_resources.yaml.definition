@@ -1,0 +1,49 @@
+# %kernel.project_dir%/config/api_resources/api_resources.yaml
+resources:
+    App\Model\Catalog:
+        attributes:
+            normalization_context:
+                groups: [ 'catalog:list' ]
+            denormalization_context:
+                groups: [ 'catalog:write' ]
+        collectionOperations:
+            get:
+                method: 'GET'
+            post:
+                method: 'POST'
+                normalization_context:
+                    groups: [ 'catalog:detail' ]
+        itemOperations:
+            get:
+                method: 'GET'
+                normalization_context:
+                    groups: [ 'catalog:detail' ]
+            put:
+                method: 'PUT'
+                normalization_context:
+                    groups: [ 'catalog:detail' ]
+            patch:
+                method: 'PATCH'
+                normalization_context:
+                    groups: [ 'catalog:detail' ]
+            delete:
+                method: 'DELETE'
+            create_pdf:
+                method: 'POST'
+                path: '/catalogs/{id}/create-pdf'
+                controller: 'App\Controller\CreatePdfAction'
+                defaults:
+                    _api_receive: true
+                    _api_respond: false,
+                    _api_swagger_context:
+                        tags: [ 'Catalog' ]
+                        summary: 'Create a PDF'
+                        parameters:
+                            name: 'id'
+                            in: 'path'
+                            required: true
+                            type: 'string'
+                            description: 'Catalog ID'
+                        responses:
+                            202:
+                                description: 'OK, got request. Someone is going to process it in background.'

@@ -1,0 +1,79 @@
+parameters:
+    # Adds a fallback VARNISH_URL if the env var is not set.
+    # This allows you to run cache:warmup even if your
+    # environment variables are not available yet.
+    # You should not need to change this value.
+    env(VARNISH_URL): ''
+
+api_platform:
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/Entity'
+#            - '%kernel.project_dir%/src/Model'
+            - '%kernel.project_dir%/src/Dto'
+            - '%kernel.project_dir%/config/api_resources'
+    title: SFDAY2018
+    version: 1.0.0
+    formats:
+        json:
+            mime_types: ['application/json']
+        jsonld:
+            mime_types: ['application/ld+json']
+        jsonhal:
+            mime_types: ['application/hal+json']
+        jsonapi:
+            mime_types: ['application/vnd.api+json']
+        xml:
+            mime_types: ['application/xml', 'text/xml']
+        yaml:
+            mime_types: ['application/x-yaml']
+        csv:
+            mime_types: ['text/csv']
+        html:
+            mime_types: ['text/html']
+    # Enable the Varnish integration
+    collection:
+        # The default order of results.
+        order: ~
+
+        # The name of the query parameter to order results.
+        order_parameter_name: 'order'
+
+        pagination:
+            # To enable or disable pagination for all resource collections by default.
+            enabled: true
+
+            # To allow the client to enable or disable the pagination.
+            client_enabled: false
+
+            # To allow the client to set the number of items per page.
+            client_items_per_page: true
+
+            # The default number of items per page.
+            items_per_page: 50
+
+            # The maximum number of items per page.
+            maximum_items_per_page: 50
+
+            # The default name of the parameter handling the page number.
+            page_parameter_name: 'page'
+
+            # The name of the query parameter to enable or disable pagination.
+            enabled_parameter_name: 'pagination'
+
+            # The name of the query parameter to set the number of items per page.
+            items_per_page_parameter_name: 'itemsPerPage'
+
+    exception_to_status:
+        Symfony\Component\Serializer\Exception\ExceptionInterface: 400
+        ApiPlatform\Core\Exception\InvalidArgumentException:       'HTTP_BAD_REQUEST'
+        App\Exception\PDFNotReadyException:                        'HTTP_NOT_ACCEPTABLE'
+
+#    http_cache:
+#        invalidation:
+#            enabled: true
+#            varnish_urls: ['%env(VARNISH_URL)%']
+#        max_age: 0
+#        shared_max_age: 3600
+#        vary: ['Content-Type', 'Authorization']
+#        public: true

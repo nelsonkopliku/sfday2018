@@ -1,0 +1,70 @@
+version: '3.4'
+
+services:
+  php:
+    image: ${CONTAINER_REGISTRY_BASE}/php
+    build:
+      context: ./api
+      target: api_platform_php
+      cache_from:
+        - ${CONTAINER_REGISTRY_BASE}/php
+        - ${CONTAINER_REGISTRY_BASE}/nginx
+        - ${CONTAINER_REGISTRY_BASE}/varnish
+    depends_on:
+      - db
+    environment:
+      - XDEBUG_CONFIG=remote_host=${HOST_IP}
+      - PHP_IDE_CONFIG=serverName=localhost
+    env_file:
+      - ./.env
+    # Comment out these volumes in production
+    volumes:
+      - ./api:/srv/api:rw,cached
+      # If you develop on Linux, uncomment the following line to use a bind-mounted host directory instead
+      - ./api/var:/srv/api/var:rw
+
+  api:
+    image: ${CONTAINER_REGISTRY_BASE}/nginx
+    build:
+      context: ./api
+      target: api_platform_nginx
+      cache_from:
+        - ${CONTAINER_REGISTRY_BASE}/php
+        - ${CONTAINER_REGISTRY_BASE}/nginx
+        - ${CONTAINER_REGISTRY_BASE}/varnish
+    depends_on:
+      - php
+    # Comment out this volume in production
+    volumes:
+      - ./api/public:/srv/api/public:ro
+    ports:
+      - "8080:80"
+
+  rabbitmq:
+    image: rabbitmq:3.7.8-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: "rabbitusr"
+      RABBITMQ_DEFAULT_PASS: "rabbitpass"
+    ports:
+      - 15672:15672
+
+  redis:
+    image: redis:latest
+
+  db:
+    # In production, you may want to use a managed database service
+    image: postgres:9.6-alpine
+    environment:
+      - POSTGRES_DB=api
+      - POSTGRES_USER=api-platform
+      # You should definitely change the password in production
+      - POSTGRES_PASSWORD=!ChangeMe!
+    volumes:
+      - db-data:/var/lib/postgresql/data:rw
+      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/db/data:/var/lib/postgresql/data:rw
+    ports:
+      - "5432:5432"
+
+volumes:
+  db-data: {}
